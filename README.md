@@ -39,6 +39,8 @@ Everything runs without environment variables. To enable accounts and sync, copy
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Only for accounts | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Only for accounts | Supabase public anon key. It's safe in the browser because Row Level Security protects the data. |
+| `ANTHROPIC_API_KEY` | Only for AI questions | Server-only key that enables AI-generated questions in Endless Practice. Never prefix it with `NEXT_PUBLIC_`. |
+| `CIVITAS_AI_MODEL` | No | Overrides the question-writing model (default `claude-opus-5`). |
 
 ## 3. Project structure
 
@@ -123,6 +125,18 @@ All content is typed. A missing field is a compile error, and `validateContent()
 6. **Today's Plan** fills the daily minute budget. It carries over one overdue task first, then takes this week's tasks in order. Tasks finished today stay visible as checked, so the list doesn't change under the student.
 
 Task IDs are deterministic, so completion survives regeneration. Lesson tasks complete when the lesson is marked complete. Practice, flashcard, FRQ, and test tasks complete when their session ends. Reading tasks such as cases, documents, and countries use a **Mark complete** button.
+
+## 6b. Endless Practice (`/practice/endless`)
+
+Students choose a course, one or more units, and **Easy, Medium, Hard, or Adaptive**, then answer as many questions as they like. Every answer is recorded toward topic mastery. Each question is labeled with where it came from. For each question, sources are tried in this order:
+
+1. **Question bank:** unseen curated questions matching the filters. Topics are weighted toward the student's weakest ones.
+2. **AI-generated questions:** only when `ANTHROPIC_API_KEY` is set, and only once fewer than three unseen bank questions remain at the current difficulty. `POST /api/questions/generate` (`src/app/api/questions/generate/route.ts`) sends Claude the topic's lesson notes plus two bank questions as style examples. It returns three schema-validated questions using structured outputs, with server-side refusal fallbacks enabled (`fallbacks: "default"`). The key stays on the server, and requests are rate-limited per IP.
+3. **Generated from course content** (`src/lib/question-generator.ts`): new questions built from key concepts, Supreme Court cases, foundational-document quotes, and country comparison data. Difficulty comes from how close the distractors are. This source works offline and never runs out.
+
+**Adaptive** mode (`src/lib/adaptive.ts`) starts at a level based on the student's mastery of the selected units. It then uses a "2-up, 1-down" staircase: two correct answers in a row step the difficulty up, and any miss steps it down. This settles where the student gets about 70% right.
+
+**Cost note:** AI generation bills to your Anthropic account, and a 3-question batch is one request. If you deploy publicly with a key, watch your usage. The per-IP limit (30 requests per 10 minutes per server instance) is a basic guard, not a billing cap.
 
 ## 7. How progress tracking works
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, ListChecks, RotateCcw, Target, Timer } from "lucide-react";
+import { ArrowRight, CheckCircle2, Infinity as InfinityIcon, ListChecks, RotateCcw, Target, Timer } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -66,6 +66,24 @@ export function PracticeHub() {
           />
         }
       />
+
+      <Link
+        href="/practice/endless"
+        className="group mb-6 flex flex-col gap-4 rounded-2xl border border-primary/25 bg-card p-5 shadow-lift transition hover:border-primary/50 sm:flex-row sm:items-center"
+      >
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <InfinityIcon className="size-6" aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-semibold tracking-tight">Endless Practice</span>
+          <span className="block text-sm text-muted-foreground">
+            Pick units and Easy, Medium, Hard, or Adaptive, then keep going. When the bank runs out, new questions are generated for your filters.
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+          Start <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+        </span>
+      </Link>
 
       <section aria-label="Practice stats" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard icon={<ListChecks />} label="Question bank" value={bank.length} sub={`${units.length} units`} />

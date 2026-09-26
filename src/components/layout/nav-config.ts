@@ -3,6 +3,7 @@ import {
   CalendarRange,
   ClipboardCheck,
   Globe2,
+  Infinity as InfinityIcon,
   Landmark,
   Layers,
   LayoutDashboard,
@@ -55,6 +56,7 @@ export const COURSE_NAV: { id: CourseId; label: string; icon: LucideIcon; items:
 ];
 
 export const TOOL_NAV: NavItem[] = [
+  { href: "/practice/endless", label: "Endless Practice", icon: InfinityIcon },
   { href: "/flashcards", label: "Flashcards", icon: Layers },
   { href: "/practice-tests", label: "Practice Tests", icon: ClipboardCheck },
   { href: "/progress", label: "Progress", icon: BarChart3 },

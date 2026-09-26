@@ -342,7 +342,7 @@ export default function DashboardPage() {
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { href: "/practice", label: "Practice questions", icon: CheckCircle2 },
+            { href: "/practice/endless", label: "Endless practice", icon: CheckCircle2 },
             { href: "/frq", label: "FRQ practice", icon: TrendingUp },
             { href: "/practice-tests", label: "Practice tests", icon: Target },
             { href: "/compare", label: "Compare countries", icon: Sparkles },
