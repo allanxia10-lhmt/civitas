@@ -8,8 +8,8 @@ export function Logo({ href = "/dashboard", className }: { href?: string; classN
       <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-card">
         <Landmark className="size-[18px]" aria-hidden />
       </span>
-      <span className="text-[17px] font-bold tracking-tight">
-        Civitas<span className="ml-1.5 text-xs font-semibold text-muted-foreground">AP Gov</span>
+      <span className="whitespace-nowrap text-[17px] font-bold tracking-tight">
+        Civitas<span className="ml-1.5 hidden text-xs font-semibold text-muted-foreground sm:inline">AP Gov</span>
       </span>
     </Link>
   );

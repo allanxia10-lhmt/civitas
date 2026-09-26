@@ -209,6 +209,9 @@ export function TestReport({ attemptId }: { attemptId: string }) {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 id="review-title" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
               <ListChecks className="size-5" aria-hidden /> Review mode
+              <Link href={`/mistakes?course=${attempt.courseId}`} className="ml-2 text-sm font-medium text-primary hover:underline">
+                Retry misses in Mistake Log →
+              </Link>
             </h2>
             <Segmented
               ariaLabel="Which questions to review"

@@ -7,6 +7,7 @@ import {
   Landmark,
   Layers,
   LayoutDashboard,
+  NotebookPen,
   Search,
   Settings,
   Sparkles,
@@ -57,6 +58,7 @@ export const COURSE_NAV: { id: CourseId; label: string; icon: LucideIcon; items:
 
 export const TOOL_NAV: NavItem[] = [
   { href: "/practice/endless", label: "Endless Practice", icon: InfinityIcon },
+  { href: "/mistakes", label: "Mistake Log", icon: NotebookPen },
   { href: "/flashcards", label: "Flashcards", icon: Layers },
   { href: "/practice-tests", label: "Practice Tests", icon: ClipboardCheck },
   { href: "/progress", label: "Progress", icon: BarChart3 },

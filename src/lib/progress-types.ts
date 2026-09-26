@@ -1,4 +1,4 @@
-import type { ChoiceId, CourseId, Flashcard, FrqType } from "@/content/types";
+import type { ChoiceId, CourseId, Flashcard, FrqType, Question } from "@/content/types";
 
 /**
  * User data model. Everything a student does is recorded here; dashboards,
@@ -121,4 +121,21 @@ export interface UserProgress {
   seenAchievements: string[];
   /** Content id → ISO time last opened (cases, documents, countries). */
   lastViewed: Record<string, string>;
+  /**
+   * Snapshots of generated or AI-written questions the student missed. Bank
+   * questions live in src/content; these don't, so the Mistake Log keeps a
+   * copy to allow a second try.
+   */
+  savedQuestions: Record<string, Question>;
+  /** Question ids the student removed from their Mistake Log. */
+  dismissedMistakes: string[];
+}
+
+/** Fills fields added after a progress file was first saved. */
+export function normalizeProgress(p: UserProgress): UserProgress {
+  return {
+    ...p,
+    savedQuestions: p.savedQuestions ?? {},
+    dismissedMistakes: p.dismissedMistakes ?? [],
+  };
 }

@@ -36,7 +36,8 @@ export function CompareTool() {
   const params = useSearchParams();
   const router = useRouter();
   const selectedIds = (params.get("c") ?? "china,uk").split(",").filter((id): id is CountryId => !!getCountry(id));
-  const selected = COUNTRIES.filter((c) => selectedIds.includes(c.id));
+  // Keep the order the student chose ("China vs. United Kingdom").
+  const selected = [...new Set(selectedIds)].map((id) => getCountry(id)!);
 
   const setSelection = (ids: CountryId[]) => router.replace(`/compare?c=${ids.join(",")}`, { scroll: false });
   const toggle = (id: CountryId) => {

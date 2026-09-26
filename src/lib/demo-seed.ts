@@ -84,7 +84,10 @@ export function createDemoProgress(today: string = toDateKey()): UserProgress {
   while (lessonCount > target) {
     const idx = doneTasks.map((d) => d.task.type).lastIndexOf("lesson");
     if (idx < 0) break;
-    doneTasks.splice(idx, 1);
+    const [removed] = doneTasks.splice(idx, 1);
+    // Its paired topic practice set shouldn't be done if the lesson isn't.
+    const practiceIdx = doneTasks.findIndex((d) => d.task.type === "practice" && d.task.refId === removed.task.refId);
+    if (practiceIdx >= 0) doneTasks.splice(practiceIdx, 1);
     lessonCount--;
   }
 
@@ -298,6 +301,8 @@ export function createDemoProgress(today: string = toDateKey()): UserProgress {
     completedTasks,
     seenAchievements: [],
     lastViewed,
+    savedQuestions: {},
+    dismissedMistakes: [],
   };
 }
 
@@ -316,5 +321,7 @@ export function createEmptyProgress(profile: UserProgress["profile"]): UserProgr
     completedTasks: {},
     seenAchievements: [],
     lastViewed: {},
+    savedQuestions: {},
+    dismissedMistakes: [],
   };
 }

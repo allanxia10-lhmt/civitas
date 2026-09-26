@@ -8,6 +8,7 @@ import {
   Clock,
   Flame,
   Layers,
+  NotebookPen,
   PartyPopper,
   Sparkles,
   Target,
@@ -28,6 +29,7 @@ import { getCourse } from "@/content";
 import { evaluateAchievements } from "@/lib/achievements";
 import { useStudyData } from "@/lib/hooks";
 import { courseCompletion, courseMastery } from "@/lib/mastery";
+import { openMistakeCount } from "@/lib/mistakes";
 import { buildRecommendations } from "@/lib/recommendations";
 import { minutesOn, recentDays, streak, weekMinutes } from "@/lib/stats";
 import { buildDailyPlan, currentWeekIndex, examDateFor, isTaskComplete, PHASES, planCompletion } from "@/lib/study-plan";
@@ -43,6 +45,7 @@ export default function DashboardPage() {
   const streakInfo = useMemo(() => streak(progress, today), [progress, today]);
   const achievements = useMemo(() => evaluateAchievements({ progress, mastery, today }), [progress, mastery, today]);
 
+  const openMistakes = useMemo(() => openMistakeCount(progress), [progress]);
   const nextItem = daily.find((i) => !i.done);
   const dailyMinutes = daily.reduce((s, i) => s + i.task.minutes, 0);
   const doneCount = daily.filter((i) => i.done).length;
@@ -290,6 +293,22 @@ export default function DashboardPage() {
                 </Button>
               </CardContent>
             </Card>
+          )}
+
+          {/* Mistake Log */}
+          {openMistakes > 0 && (
+            <Link href="/mistakes" className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-card transition hover:shadow-lift">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-danger-soft text-danger">
+                <NotebookPen className="size-[18px]" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">
+                  {openMistakes} {openMistakes === 1 ? "mistake" : "mistakes"} to retry
+                </p>
+                <p className="text-xs text-muted-foreground">Give them a Second Chance in your Mistake Log</p>
+              </div>
+              <ArrowRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5" aria-hidden />
+            </Link>
           )}
 
           {/* Flashcards + achievements */}

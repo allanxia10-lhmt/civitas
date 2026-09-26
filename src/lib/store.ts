@@ -2,21 +2,23 @@
 
 import { toast } from "sonner";
 import { create } from "zustand";
-import type { CourseId, Flashcard } from "@/content/types";
+import { getQuestion } from "@/content";
+import type { CourseId, Flashcard, Question } from "@/content/types";
 import { evaluateAchievements } from "./achievements";
 import { createDemoProgress, createEmptyProgress } from "./demo-seed";
 import { computeMastery } from "./mastery";
 import { LocalProgressRepository } from "./persistence/local";
 import { SupabaseProgressRepository } from "./persistence/supabase";
 import type { ProgressRepository } from "./persistence/types";
-import type {
-  FrqSubmission,
-  Grade,
-  Profile,
-  QuestionAttempt,
-  SessionActivity,
-  TestAttempt,
-  UserProgress,
+import {
+  normalizeProgress,
+  type FrqSubmission,
+  type Grade,
+  type Profile,
+  type QuestionAttempt,
+  type SessionActivity,
+  type TestAttempt,
+  type UserProgress,
 } from "./progress-types";
 import { schedule } from "./srs";
 import { getSupabase } from "./supabase/client";
@@ -45,7 +47,10 @@ interface StoreState {
 
   startLesson: (lessonId: string) => void;
   completeLesson: (lessonId: string, minutes: number) => void;
-  recordAttempt: (attempt: Omit<QuestionAttempt, "id" | "at">) => void;
+  /** Pass `question` for generated/AI questions so a miss can be retried later from the Mistake Log. */
+  recordAttempt: (attempt: Omit<QuestionAttempt, "id" | "at">, question?: Question) => void;
+  dismissMistake: (questionId: string) => void;
+  restoreMistake: (questionId: string) => void;
   reviewFlashcard: (cardId: string, grade: Grade) => void;
   addCustomFlashcard: (card: Omit<Flashcard, "id" | "deck">) => void;
   deleteCustomFlashcard: (id: string) => void;
@@ -158,7 +163,7 @@ export const useStore = create<StoreState>((set, get) => {
         progress = seenAll(createDemoProgress());
         persist(progress);
       }
-      set({ progress, hydrated: true, backend: repository.kind, user });
+      set({ progress: normalizeProgress(progress), hydrated: true, backend: repository.kind, user });
     },
 
     completeOnboarding: (input) => {
@@ -195,8 +200,9 @@ export const useStore = create<StoreState>((set, get) => {
 
     importProgress: (data) => {
       if (data?.version !== 1 || !data.profile) throw new Error("This file isn't a Civitas progress export.");
-      set({ progress: data });
-      persist(data);
+      const progress = normalizeProgress(data);
+      set({ progress });
+      persist(progress);
     },
 
     startLesson: (lessonId) => {
@@ -214,11 +220,26 @@ export const useStore = create<StoreState>((set, get) => {
       }));
     },
 
-    recordAttempt: (attempt) =>
-      commit((p) => ({
-        ...p,
-        attempts: [...p.attempts, { ...attempt, id: uid("a"), at: new Date().toISOString() }],
-      })),
+    recordAttempt: (attempt, question) =>
+      commit((p) => {
+        let savedQuestions = p.savedQuestions;
+        // Keep a copy of missed generated/AI questions (bank questions are always available).
+        if (question && !attempt.correct && !getQuestion(question.id) && !savedQuestions[question.id]) {
+          const kept = Object.entries(savedQuestions).slice(-299);
+          savedQuestions = { ...Object.fromEntries(kept), [question.id]: question };
+        }
+        return {
+          ...p,
+          savedQuestions,
+          attempts: [...p.attempts, { ...attempt, id: uid("a"), at: new Date().toISOString() }],
+        };
+      }),
+
+    dismissMistake: (questionId) =>
+      commit((p) => (p.dismissedMistakes.includes(questionId) ? p : { ...p, dismissedMistakes: [...p.dismissedMistakes, questionId] }), false),
+
+    restoreMistake: (questionId) =>
+      commit((p) => ({ ...p, dismissedMistakes: p.dismissedMistakes.filter((id) => id !== questionId) }), false),
 
     reviewFlashcard: (cardId, grade) =>
       commit((p) => ({

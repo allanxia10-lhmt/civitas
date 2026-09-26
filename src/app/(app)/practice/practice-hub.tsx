@@ -16,7 +16,7 @@ import { lessonsForUnit, questionsForCourse, questionsForTopic, unitsForCourse }
 import type { CourseId } from "@/content/types";
 import { useStudyData } from "@/lib/hooks";
 import { accuracy } from "@/lib/stats";
-import { missedQuestionIds } from "./practice-utils";
+import { openMistakeCount } from "@/lib/mistakes";
 
 export function PracticeHub() {
   const { progress, mastery } = useStudyData();
@@ -35,7 +35,7 @@ export function PracticeHub() {
 
   const bank = questionsForCourse(course);
   const acc = accuracy(progress, course);
-  const missed = useMemo(() => missedQuestionIds(progress, course).length, [progress, course]);
+  const missed = useMemo(() => openMistakeCount(progress, course), [progress, course]);
   const topicOptions = unit === "all" ? [] : lessonsForUnit(unit);
 
   const start = () => {
@@ -89,7 +89,9 @@ export function PracticeHub() {
         <StatCard icon={<ListChecks />} label="Question bank" value={bank.length} sub={`${units.length} units`} />
         <StatCard icon={<CheckCircle2 />} tone="success" label="Answered" value={acc.answered} sub="all time" />
         <StatCard icon={<Target />} tone="xp" label="Accuracy" value={acc.answered ? `${acc.percent}%` : "—"} sub={`${acc.correct} correct`} />
-        <StatCard icon={<RotateCcw />} tone="warning" label="To redo" value={missed} sub="missed on last try" />
+        <Link href={`/mistakes?course=${course}`} className="rounded-xl transition hover:opacity-90" aria-label={`Mistake Log: ${missed} to retry`}>
+          <StatCard icon={<RotateCcw />} tone="warning" label="Mistake Log" value={missed} sub="to retry · Second Chance →" className="h-full" />
+        </Link>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">

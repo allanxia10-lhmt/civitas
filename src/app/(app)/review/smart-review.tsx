@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BookOpen, CalendarClock, ClipboardCheck, Layers, PenLine, RotateCcw, Sparkles, TrendingDown } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarClock, ClipboardCheck, Layers, NotebookPen, PenLine, RotateCcw, Sparkles, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -20,6 +20,7 @@ import { addDays, cn, daysBetween, isoToDateKey, percent } from "@/lib/utils";
 
 const KIND_ICON: Record<RecommendationKind, typeof BookOpen> = {
   missed: RotateCcw,
+  mistakes: NotebookPen,
   "low-mastery": TrendingDown,
   frq: PenLine,
   flashcards: Layers,

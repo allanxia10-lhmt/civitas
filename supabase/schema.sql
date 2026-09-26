@@ -129,8 +129,13 @@ create table if not exists public.completed_tasks (
 create table if not exists public.user_meta (
   user_id            uuid primary key references auth.users on delete cascade,
   seen_achievements  text[] not null default '{}',
-  last_viewed        jsonb not null default '{}'
+  last_viewed        jsonb not null default '{}',
+  saved_questions    jsonb not null default '{}',   -- copies of missed generated/AI questions (Mistake Log)
+  dismissed_mistakes text[] not null default '{}'
 );
+-- For databases created before the Mistake Log existed:
+alter table public.user_meta add column if not exists saved_questions jsonb not null default '{}';
+alter table public.user_meta add column if not exists dismissed_mistakes text[] not null default '{}';
 
 -- Row Level Security: owners only ---------------------------------------------
 alter table public.profiles          enable row level security;

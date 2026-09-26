@@ -31,7 +31,10 @@ export function SearchView() {
   const results = useMemo(() => (query.trim() ? search(query, { limit: 200 }) : []), [query]);
   const counts = TYPE_ORDER.map((t) => ({ t, n: results.filter((r) => r.type === t).length })).filter((c) => c.n > 0);
   const shown = type === "all" ? results : results.filter((r) => r.type === type);
-  const grouped = TYPE_ORDER.map((t) => ({ t, items: shown.filter((r) => r.type === t) })).filter((g) => g.items.length);
+  // Groups appear in order of their best match, so the top result is always first on the page.
+  const grouped = TYPE_ORDER.map((t) => ({ t, items: shown.filter((r) => r.type === t) }))
+    .filter((g) => g.items.length)
+    .sort((a, b) => b.items[0].score - a.items[0].score);
 
   return (
     <div>

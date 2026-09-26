@@ -1,11 +1,12 @@
 import { FLASHCARDS, FRQ_TYPES, getLesson, lessonsForCourse, PRACTICE_TESTS } from "@/content";
 import type { CourseId, FrqType } from "@/content/types";
 import type { TopicMastery } from "./mastery";
+import { buildMistakeLog } from "./mistakes";
 import type { UserProgress } from "./progress-types";
 import { isDue, isHard } from "./srs";
 import { addDays, daysBetween, isoToDateKey, percent, plural } from "./utils";
 
-export type RecommendationKind = "missed" | "low-mastery" | "frq" | "flashcards" | "refresh" | "next-lesson" | "test";
+export type RecommendationKind = "missed" | "mistakes" | "low-mastery" | "frq" | "flashcards" | "refresh" | "next-lesson" | "test";
 
 export interface Recommendation {
   id: string;
@@ -58,6 +59,21 @@ export function buildRecommendations(
         { label: "Revisit lesson", href: `/lessons/${topicId}` },
         { label: "Practice missed", href: `/practice/session?course=${lesson.courseId}&topic=${topicId}&mode=missed&count=10` },
       ],
+    });
+  }
+
+  // 1b. Open items in the Mistake Log.
+  const openMistakes = buildMistakeLog(progress).filter((m) => m.status === "open" && inCourse(m.question.courseId)).length;
+  if (openMistakes >= 3) {
+    recs.push({
+      id: "mistake-log",
+      kind: "mistakes",
+      courseId: courseFilter,
+      title: `Give ${openMistakes} missed questions a second chance`,
+      reason: `Your Mistake Log has ${openMistakes} questions you haven't gotten right yet. Retrying a missed question after a short gap is one of the most effective ways to lock a concept in — and each one you get right moves to Corrected.`,
+      priority: 72 + Math.min(openMistakes, 20) / 2,
+      minutes: Math.max(5, Math.min(20, openMistakes)),
+      actions: [{ label: "Start Second Chance", href: courseFilter ? `/mistakes?course=${courseFilter}` : "/mistakes" }],
     });
   }
 

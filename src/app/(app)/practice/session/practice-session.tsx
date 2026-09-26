@@ -137,6 +137,11 @@ export function PracticeSession() {
                     <RotateCcw /> Redo the {missed.length} I missed
                   </Button>
                 )}
+                {missed.length > 0 && (
+                  <Button asChild variant="outline">
+                    <Link href="/mistakes">Open Mistake Log</Link>
+                  </Button>
+                )}
                 <Button asChild variant="outline">
                   <Link href="/dashboard">Back to dashboard</Link>
                 </Button>

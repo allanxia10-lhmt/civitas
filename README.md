@@ -138,6 +138,17 @@ Students choose a course, one or more units, and **Easy, Medium, Hard, or Adapti
 
 **Cost note:** AI generation bills to your Anthropic account, and a 3-question batch is one request. If you deploy publicly with a key, watch your usage. The per-IP limit (30 requests per 10 minutes per server instance) is a basic guard, not a billing cap.
 
+## 6c. Mistake Log and Second Chance (`/mistakes`)
+
+The Mistake Log (`src/lib/mistakes.ts`) is built from attempt history. It collects every missed question from lessons, practice, Endless Practice, and tests.
+
+- A question is **open** if the student's most recent attempt at it was wrong.
+- It's **corrected** once a later attempt gets it right.
+
+Generated and AI-written questions aren't in the bank, so when one is missed the store keeps a copy in `savedQuestions`. That lets it be retried too.
+
+**Second Chance** replays open mistakes with the answer choices reshuffled, so students recall the answer rather than its position. Retries are recorded with source `review`. Students can reveal the answer and explanation, filter by course and unit, sort by recency or miss count, and remove bad items (with undo). Smart Review and the dashboard surface the log once mistakes pile up.
+
 ## 7. How progress tracking works
 
 The store (`src/lib/store.ts`) records **raw events only**: lesson start/complete, question attempts, flashcard reviews, FRQ submissions, test attempts, study sessions (minutes), and completed plan tasks. Everything else is **derived** on the fly, so it can never drift out of sync:

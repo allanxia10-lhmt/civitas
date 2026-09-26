@@ -250,7 +250,10 @@ export function EndlessPractice() {
   const onAnswer = (selected: ChoiceId, correct: boolean, seconds: number) => {
     if (!item) return;
     const q = item.question;
-    recordAttempt({ questionId: q.id, courseId: q.courseId, unitId: q.unitId, topicId: q.topicId, selected, correct, seconds, source: "practice" });
+    recordAttempt(
+      { questionId: q.id, courseId: q.courseId, unitId: q.unitId, topicId: q.topicId, selected, correct, seconds, source: "practice" },
+      item.source === "bank" ? undefined : q,
+    );
     answeredCount.current += 1;
     setHistory((h) => [...h, { item, selected, correct, level: q.difficulty }]);
     setAnswered(true);
@@ -477,6 +480,13 @@ export function EndlessPractice() {
               <Button variant="outline" onClick={() => setPhase("setup")}>
                 <Settings2 /> Change filters
               </Button>
+              {history.some((h) => !h.correct) && (
+                <Button asChild variant="outline">
+                  <Link href={`/mistakes?course=${config.courseId}`}>
+                    <RotateCcw /> Second Chance
+                  </Link>
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -616,12 +626,13 @@ export function EndlessPractice() {
             </>
           )}
         </p>
+        {/* Distinct keys so React mounts a new button and autoFocus moves focus to "Next". */}
         {answered ? (
-          <Button size="lg" className="shadow-lift" autoFocus onClick={serveNext}>
+          <Button key="next" size="lg" className="shadow-lift" autoFocus onClick={serveNext}>
             Next question <ArrowRight />
           </Button>
         ) : (
-          <Button variant="ghost" onClick={serveNext}>
+          <Button key="skip" variant="ghost" onClick={serveNext}>
             <SkipForward /> Skip
           </Button>
         )}

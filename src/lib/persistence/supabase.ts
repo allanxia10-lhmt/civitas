@@ -127,6 +127,8 @@ export class SupabaseProgressRepository implements ProgressRepository {
       completedTasks: Object.fromEntries((tasks.data ?? []).map((r) => [r.task_id, r.completed_at])),
       seenAchievements: meta.data?.seen_achievements ?? [],
       lastViewed: meta.data?.last_viewed ?? {},
+      savedQuestions: meta.data?.saved_questions ?? {},
+      dismissedMistakes: meta.data?.dismissed_mistakes ?? [],
     };
     this.last = progress;
     return progress;
@@ -272,8 +274,22 @@ export class SupabaseProgressRepository implements ProgressRepository {
     const removedTasks = Object.keys(prev?.completedTasks ?? {}).filter((id) => !(id in next.completedTasks));
     if (removedTasks.length) ops.push(this.db.from("completed_tasks").delete().in("task_id", removedTasks).eq("user_id", uid));
 
-    if (!prev || changed(prev.seenAchievements, next.seenAchievements) || changed(prev.lastViewed, next.lastViewed)) {
-      ops.push(this.db.from("user_meta").upsert({ user_id: uid, seen_achievements: next.seenAchievements, last_viewed: next.lastViewed }));
+    if (
+      !prev ||
+      changed(prev.seenAchievements, next.seenAchievements) ||
+      changed(prev.lastViewed, next.lastViewed) ||
+      changed(prev.savedQuestions, next.savedQuestions) ||
+      changed(prev.dismissedMistakes, next.dismissedMistakes)
+    ) {
+      ops.push(
+        this.db.from("user_meta").upsert({
+          user_id: uid,
+          seen_achievements: next.seenAchievements,
+          last_viewed: next.lastViewed,
+          saved_questions: next.savedQuestions,
+          dismissed_mistakes: next.dismissedMistakes,
+        }),
+      );
     }
 
     const results = await Promise.all(ops);
